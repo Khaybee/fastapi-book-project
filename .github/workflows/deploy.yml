@@ -30,6 +30,8 @@ jobs:
 
           cd /usr/share/nginx/html/fastapi-book-project
           git config --global --add safe.directory /usr/share/nginx/html/fastapi-book-project
+
+          git reset --hard HEAD
           git pull origin main
 
           if [ ! -d "venv" ]; then
