@@ -129,6 +129,73 @@ The API includes proper error handling for:
 - Invalid genre types
 - Malformed requests
 
+
+Deployment Instructions
+
+## Deployment Instructions
+
+1. Set Up the Server
+
+git clone https://github.com/Khaybee/fastapi-book-project.git
+cd fastapi-book-project
+
+2. Configure Nginx
+Create a new Nginx configuration file (/etc/nginx/conf.d/fastapi.conf):
+
+sudo nano /etc/nginx/conf.d/fastapi.conf
+
+Paste the following configuration:
+
+server {
+    listen 80;
+    server_name YOUR_SERVER_IP;  # Replace with your domain or IP address
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+Save and exit, then restart Nginx:
+
+sudo systemctl restart nginx
+
+3. Set Up Gunicorn & systemd Service
+
+Create a systemd service file:
+
+sudo nano /etc/systemd/system/fastapi.service
+
+Add the following content:
+
+[Unit]
+Description=Gunicorn instance to serve FastAPI
+After=network.target
+
+[Service]
+User=ec2-user
+Group=www-data
+WorkingDirectory=/usr/share/nginx/html/fastapi-book-project
+ExecStart=/usr/share/nginx/html/fastapi-book-project/venv/bin/gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+Reload systemd and start the service:
+
+sudo systemctl daemon-reload
+sudo systemctl enable fastapi
+sudo systemctl start fastapi
+
+sudo systemctl start fastapi
+
+Your API should now be running and accessible via http://YOUR_SERVER_IP.
+
+
 ## Contributing
 
 1. Fork the repository
