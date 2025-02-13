@@ -25,9 +25,13 @@ jobs:
           echo "Deploying to server..."
           ssh -i ~/.ssh/id_rsa ec2-user@13.48.56.51 << 'EOF'
           set -e  # Exit on error
+          sudo chown -R $USER:$USER /usr/share/nginx/html/fastapi-book-project
             cd /usr/share/nginx/html/fastapi-book-project
             git config --global --add safe.directory /usr/share/nginx/html/fastapi-book-project
             git pull origin main
+            if [ ! -d "venv" ]; then
+              python3 -m venv venv
+            fi
             source venv/bin/activate
             pip install -r requirements.txt
             sudo systemctl restart fastapi
